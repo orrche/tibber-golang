@@ -12,7 +12,7 @@ import (
 )
 
 const subscriptionEndpoint = "v1-beta/gql/subscriptions"
-const tibberHost = "api.tibber.com"
+const tibberHost = "websocket-api.tibber.com"
 
 const (
 	StreamStateConnected    = "CONNECTED"
@@ -25,9 +25,9 @@ type MsgChan chan *StreamMsg
 
 // StreamMsg for streams
 type StreamMsg struct {
-	HomeID  string  `json:"homeId"`
+	//HomeID  string  `json:"homeId"`
 	Type    string  `json:"type"`
-	ID      int     `json:"id"`
+	ID      string  `json:"id"`
 	Payload Payload `json:"payload"`
 }
 
@@ -222,9 +222,10 @@ func (ts *Stream) msgLoop() {
 				continue
 			}
 		} else {
+
 			unknownErrorCounter = 0
 			switch tm.Type {
-			case "init_success":
+			case "connection_ack":
 				log.Info("<TibberStream> Init success")
 				ts.initialized = true
 				ts.sendSubMsg()
@@ -232,8 +233,8 @@ func (ts *Stream) msgLoop() {
 			case "subscription_success":
 				log.Info("<TibberStream> Subscription success")
 
-			case "subscription_data":
-				tm.HomeID = ts.ID
+			case "next":
+				//tm.HomeID = ts.ID
 				ts.outputChan <- &tm
 
 			case "subscription_fail":
@@ -281,9 +282,13 @@ func (ts *Stream) connect() error {
 	var err error
 	for {
 		reqHeader := make(http.Header)
-		reqHeader.Add("Sec-WebSocket-Protocol", "graphql-subscriptions")
-		ts.client, _, err = websocket.DefaultDialer.Dial(u.String(), reqHeader)
+		reqHeader.Add("Sec-WebSocket-Protocol", "graphql-transport-ws")
+		reqHeader.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
+		//reqHeader.Add("Sec-Websocket-Key", "4Zak28b4/giofSuXHElLjQ==")
+		var resp *http.Response
+		ts.client, resp, err = websocket.DefaultDialer.Dial(u.String(), reqHeader)
+		log.Error(resp)
 		if err != nil {
 			log.Error("<TibberStream> Dial error", err)
 			time.Sleep(time.Second * 2)
@@ -303,7 +308,7 @@ func (ts *Stream) Stop() {
 }
 
 func (ts *Stream) sendInitMsg() {
-	init := `{"type":"init","payload":"token=` + ts.Token + `"}`
+	init := `{"type":"connection_init","payload":{"token":"` + ts.Token + `"}}`
 	ts.client.WriteMessage(websocket.TextMessage, []byte(init))
 }
 
@@ -347,10 +352,13 @@ func (ts *Stream) sendSubMsg() {
 
 	sub := fmt.Sprintf(`
 	{
-		"query": "%s",
-		"variables":null,
-		"type":"subscription_start",
-		"id":0
+		"payload": {
+			"query": "%s",
+			"variables":null,
+			"extensions":null
+		},
+		"type":"subscribe",
+		"id":"35f11a3d-9ffb-4f65-b031-d937ab639fab"
 	}`, jsonEscape(subscriptionQuery))
 
 	log.Debug("Subscribe with query", sub)
