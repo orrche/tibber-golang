@@ -358,9 +358,11 @@ func (ts *Stream) sendSubMsg() {
 			"extensions":null
 		},
 		"type":"subscribe",
-		"id":"35f11a3d-9ffb-4f65-b031-d937ab639fab"
+		"id":"0"
 	}`, jsonEscape(subscriptionQuery))
 
 	log.Debug("Subscribe with query", sub)
 	ts.client.WriteMessage(websocket.TextMessage, []byte(sub))
 }
+
+//		"id":"35f11a3d-9ffb-4f65-b031-d937ab639fab"
