@@ -234,7 +234,6 @@ func (ts *Stream) msgLoop() {
 				log.Info("<TibberStream> Subscription success")
 
 			case "next":
-				//tm.HomeID = ts.ID
 				ts.outputChan <- &tm
 
 			case "subscription_fail":
@@ -285,7 +284,6 @@ func (ts *Stream) connect() error {
 		reqHeader.Add("Sec-WebSocket-Protocol", "graphql-transport-ws")
 		reqHeader.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
-		//reqHeader.Add("Sec-Websocket-Key", "4Zak28b4/giofSuXHElLjQ==")
 		var resp *http.Response
 		ts.client, resp, err = websocket.DefaultDialer.Dial(u.String(), reqHeader)
 		log.Error(resp)
@@ -364,5 +362,3 @@ func (ts *Stream) sendSubMsg() {
 	log.Debug("Subscribe with query", sub)
 	ts.client.WriteMessage(websocket.TextMessage, []byte(sub))
 }
-
-//		"id":"35f11a3d-9ffb-4f65-b031-d937ab639fab"
