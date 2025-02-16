@@ -23,6 +23,14 @@ type HomeResponse struct {
 	Viewer HomeViewer `json:"viewer"`
 }
 
+type SubscriptionResponse struct {
+	Viewer SubscriptionViewer `json:"viewer"`
+}
+
+type SubscriptionViewer struct {
+	WebsocketSubscriptionUrl string `json:"websocketSubscriptionUrl"`
+}
+
 type HomeViewer struct {
 	Home Home `json:"home"`
 }
@@ -129,6 +137,26 @@ func (t *Client) GetHomes() ([]Home, error) {
 		return nil, err
 	}
 	return result.Viewer.Homes, nil
+}
+
+func (t *Client) GetSubscriptionURL() (string, error) {
+	req := graphql.NewRequest(`
+		query {
+			viewer {
+				websocketSubscriptionUrl
+			}
+		}`)
+
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Authorization", "Bearer "+t.Token)
+	ctx := context.Background()
+	var result SubscriptionResponse
+	if err := t.gqlClient.Run(ctx, req, &result); err != nil {
+		log.Error(err)
+		return "", err
+	}
+	return result.Viewer.WebsocketSubscriptionUrl, nil
+
 }
 
 // GetHomeById get a home with information
