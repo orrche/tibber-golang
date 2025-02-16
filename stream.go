@@ -360,5 +360,8 @@ func (ts *Stream) sendSubMsg() {
 	}`, jsonEscape(subscriptionQuery))
 
 	log.Debug("Subscribe with query", sub)
-	ts.client.WriteMessage(websocket.TextMessage, []byte(sub))
+	err := ts.client.WriteMessage(websocket.TextMessage, []byte(sub))
+	if err != nil {
+		log.WithError(err).Error("<TibberStream> Error sending subscription message")
+	}
 }
