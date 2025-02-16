@@ -1,11 +1,11 @@
 package tibber
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 type TestConfig struct {
@@ -28,21 +28,14 @@ func loadTestConfig() TestConfig {
 	return tc
 }
 
-func helperLoadBytes(t *testing.T, name string) []byte {
-	path := filepath.Join("testdata", name) // relative path
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return bytes
-}
-
 func TestGetHomes(t *testing.T) {
-	token := string(helperLoadBytes(t, "token.txt"))
-	tc := NewClient(token)
-	homes, _ := tc.GetHomes()
-	if homes == nil {
-		t.Fatalf("GetHomes: %v", homes)
+	conf := loadTestConfig()
+	tc := NewClient(conf.Token)
+	homes, err := tc.GetHomes()
+	if err == nil {
+		t.Logf("GetHomes: %v", homes)
+	} else {
+		t.Fatalf("GetHomes: %v, %v", err, homes)
 	}
 }
 
@@ -54,12 +47,12 @@ func TestSubscriptionFetch(t *testing.T) {
 }
 
 func TestGetHomeById(t *testing.T) {
-	token := string(helperLoadBytes(t, "token.txt"))
-	tc := NewClient(token)
-	homeID := string(helperLoadBytes(t, "homeId.txt"))
-	home, _ := tc.GetHomeById(homeID)
+	conf := loadTestConfig()
+	tc := NewClient(conf.Token)
+	t.Logf("HomeID: %s", conf.HomeID)
+	home, _ := tc.GetHomeById(conf.HomeID)
 	if home.ID == "" {
-		t.Fatalf("GetHomeById: %s %v", homeID, home)
+		t.Fatalf("GetHomeById: %s %v", conf.HomeID, home)
 	}
 }
 
@@ -93,11 +86,12 @@ func TestStreams(t *testing.T) {
 }
 
 func TestGetCurrentPrice(t *testing.T) {
-	token := string(helperLoadBytes(t, "token.txt"))
-	tc := NewClient(token)
-	homeID := string(helperLoadBytes(t, "homeId.txt"))
-	priceInfo, _ := tc.GetCurrentPrice(homeID)
+	conf := loadTestConfig()
+	tc := NewClient(conf.Token)
+	priceInfo, _ := tc.GetCurrentPrice(conf.HomeID)
 	if priceInfo.Level == "" {
 		t.Fatalf("GetCurrentPrice: %v", priceInfo)
+	} else {
+		t.Logf("GetCurrentPrice: %v", priceInfo)
 	}
 }
