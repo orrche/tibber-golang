@@ -66,20 +66,19 @@ func TestGetHomeById(t *testing.T) {
 // }
 
 func TestStreams(t *testing.T) {
-	var msgCh MsgChan
-	testConfig := loadTestConfig()
-	token := testConfig.Token
-	homeID := testConfig.HomeID
-	t.Logf("homeID: %s", homeID)
-	stream := NewStream(homeID, token)
+	msgCh := make(MsgChan)
+	conf := loadTestConfig()
+	stream := NewStream(conf.HomeID, conf.Token)
 	err := stream.StartSubscription(msgCh)
 	if err != nil {
-		t.Fatalf("Push: %v", err)
+		t.Fatalf("StartSubscription: %v", err)
 	}
+
 	select {
 	case msg := <-msgCh:
 		t.Log(msg)
 	case <-time.After(time.Second * 7):
+		t.Log("No messages received")
 		break
 	}
 	stream.Stop()
