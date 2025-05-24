@@ -8,6 +8,17 @@ Limited implementation of the Tibber API in golang
 * Subscribe to data from Tibber Pulse
 
 
+Basic test:
+```bash
+go test ./...
+```
+
+With push notifications:
+```bash
+go test -tags=tibberpush ./...
+```
+
+
 ## Usage
 
 ```go
