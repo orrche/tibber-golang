@@ -146,7 +146,6 @@ func (ts *Stream) StartSubscription(outputChan MsgChan) error {
 			log.WithError(err).Error("<TibberStream> Could not connect to websocket")
 			time.Sleep(time.Second * 7) // trying to repair the connection
 		} else {
-			ts.initialized = false
 			log.Info("<TibberStream> Connected")
 			break // connection was made
 		}
@@ -199,7 +198,6 @@ func (ts *Stream) msgLoop() {
 				log.WithError(err).Error("<TibberStream> CloseError, Reconnecting after 10 seconds")
 				ts.reportState(StreamStateDisconnected, err)
 				time.Sleep(time.Second * 10) // trying to repair the connection
-				ts.initialized = false
 				err = ts.connect()
 				if err != nil {
 					log.WithError(err).Error("<TibberStream> Could not connect to websocket")
@@ -270,6 +268,7 @@ func (ts *Stream) isWsCloseError(err error) bool {
 }
 
 func (ts *Stream) connect() error {
+	ts.initialized = false
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("<TibberStream> ID: ", ts.ID, " - Process CRASHED with error : ", r)
