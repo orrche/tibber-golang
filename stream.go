@@ -191,7 +191,7 @@ func (ts *Stream) msgLoop(outputChan MsgChan) {
 		tm := StreamMsg{}
 		err := ts.client.ReadJSON(&tm)
 		if err != nil {
-			if ts.isWsCloseError(err) {
+			if isWsCloseError(err) {
 				log.WithError(err).Error("<TibberStream> CloseError, Reconnecting after 10 seconds")
 				ts.reportState(StreamStateDisconnected, err)
 				time.Sleep(time.Second * 10) // trying to repair the connection
@@ -243,7 +243,7 @@ func (ts *Stream) msgLoop(outputChan MsgChan) {
 	}
 	log.Debug("<TibberStream> Stopping")
 }
-func (ts *Stream) isWsCloseError(err error) bool {
+func isWsCloseError(err error) bool {
 	return websocket.IsCloseError(err,
 		websocket.CloseGoingAway,
 		websocket.CloseAbnormalClosure,
