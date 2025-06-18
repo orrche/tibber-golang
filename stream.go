@@ -169,7 +169,7 @@ func (ts *Stream) reportState(state string, err error) {
 
 func (ts *Stream) startMsgRouter() {
 	go func() {
-		for {
+		for ts.isRunning {
 			ts.msgLoop()
 			log.Error("<TibberStream> Restarting msg router")
 		}
@@ -187,7 +187,7 @@ func (ts *Stream) msgLoop() {
 		}
 	}()
 	var unknownErrorCounter int
-	for {
+	for ts.isRunning {
 		if !ts.initialized {
 			ts.sendInitMsg()
 		}
@@ -243,11 +243,8 @@ func (ts *Stream) msgLoop() {
 				log.Info("<TibberStream> Unexpected message type :", tm.Type)
 			}
 		}
-		if !ts.isRunning {
-			log.Debug("<TibberStream> Stopping")
-			break
-		}
 	}
+	log.Debug("<TibberStream> Stopping")
 }
 func (ts *Stream) isWsCloseError(err error) bool {
 	return websocket.IsCloseError(err,
