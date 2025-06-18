@@ -60,10 +60,7 @@ func TestStreams(t *testing.T) {
 	msgCh := make(MsgChan)
 	conf := loadTestConfig()
 	stream := NewStream(conf.HomeID, conf.Token)
-	err := stream.StartSubscription(msgCh)
-	if err != nil {
-		t.Fatalf("StartSubscription: %v", err)
-	}
+	go stream.Listen(msgCh)
 
 	select {
 	case msg := <-msgCh:

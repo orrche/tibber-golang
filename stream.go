@@ -136,11 +136,10 @@ func NewStream(id, token string) *Stream {
 	return &ts
 }
 
-// StartSubscription init connection and subscribes to home id
-func (ts *Stream) StartSubscription(outputChan MsgChan) error {
-	// Connect
+// Listen starts the stream and listens for messages, will reconnect until isRunning is set to false.
+func (ts *Stream) Listen(outputChan MsgChan) {
 	ts.outputChan = outputChan
-	for {
+	for ts.isRunning {
 		err := ts.connect()
 		if err != nil {
 			log.WithError(err).Error("<TibberStream> Could not connect to websocket")
@@ -150,7 +149,18 @@ func (ts *Stream) StartSubscription(outputChan MsgChan) error {
 			break // connection was made
 		}
 	}
-	ts.startMsgRouter()
+
+	for ts.isRunning {
+		ts.msgLoop()
+		log.Error("<TibberStream> Restarting msg router")
+	}
+}
+
+// StartSubscription init connection and subscribes to home id
+//
+// Deprecated: Uses go rutin to spawn of unmanaged processes
+func (ts *Stream) StartSubscription(outputChan MsgChan) error {
+	go ts.Listen(outputChan)
 	return nil
 }
 
@@ -165,15 +175,6 @@ func (ts *Stream) reportState(state string, err error) {
 		log.Debug("<TibberStream> No error liste")
 	}
 
-}
-
-func (ts *Stream) startMsgRouter() {
-	go func() {
-		for ts.isRunning {
-			ts.msgLoop()
-			log.Error("<TibberStream> Restarting msg router")
-		}
-	}()
 }
 
 func (ts *Stream) msgLoop() {
