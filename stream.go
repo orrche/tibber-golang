@@ -16,7 +16,6 @@ const tibberHost = "websocket-api.tibber.com"
 
 const (
 	StreamStateConnected    = "CONNECTED"
-	StreamStateConnecting   = "CONNECTING"
 	StreamStateDisconnected = "DISCONNECTED"
 )
 
@@ -25,7 +24,6 @@ type MsgChan chan *StreamMsg
 
 // StreamMsg for streams
 type StreamMsg struct {
-	//HomeID  string  `json:"homeId"`
 	Type    string  `json:"type"`
 	ID      string  `json:"id"`
 	Payload Payload `json:"payload"`
