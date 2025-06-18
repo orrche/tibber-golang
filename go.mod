@@ -1,13 +1,18 @@
 module github.com/tskaard/tibber-golang
 
 require (
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/machinebox/graphql v0.2.2
-	github.com/matryer/is v1.2.0 // indirect
-	github.com/pkg/errors v0.8.1 // indirect
-	github.com/sirupsen/logrus v1.6.0
-	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
+	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-go 1.13
+require (
+	github.com/matryer/is v1.2.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+)
+
+go 1.23.0
+
+toolchain go1.24.3
