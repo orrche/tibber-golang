@@ -117,7 +117,6 @@ type Stream struct {
 	initialized     bool
 	client          *websocket.Conn
 	stateReportChan chan StreamState
-	outputChan      MsgChan
 }
 
 func (ts *Stream) StateReportChan() chan StreamState {
@@ -138,7 +137,6 @@ func NewStream(id, token string) *Stream {
 
 // Listen starts the stream and listens for messages, will reconnect until isRunning is set to false.
 func (ts *Stream) Listen(outputChan MsgChan) {
-	ts.outputChan = outputChan
 	for ts.isRunning {
 		err := ts.connect()
 		if err != nil {
@@ -151,7 +149,7 @@ func (ts *Stream) Listen(outputChan MsgChan) {
 	}
 
 	for ts.isRunning {
-		ts.msgLoop()
+		ts.msgLoop(outputChan)
 		log.Error("<TibberStream> Restarting msg router")
 	}
 }
@@ -177,7 +175,7 @@ func (ts *Stream) reportState(state string, err error) {
 
 }
 
-func (ts *Stream) msgLoop() {
+func (ts *Stream) msgLoop(outputChan MsgChan) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("<TibberStream> Process CRASHED with error: ", r)
@@ -233,7 +231,7 @@ func (ts *Stream) msgLoop() {
 				log.Info("<TibberStream> Subscription success")
 
 			case "next":
-				ts.outputChan <- &tm
+				outputChan <- &tm
 
 			case "subscription_fail":
 				err := fmt.Errorf("subscription failed")
